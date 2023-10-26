@@ -6,6 +6,10 @@ class Vector {
     
     static ZERO = new Vector(0, 0);
     static ONE = new Vector(1, 1);
+    static UP = new Vector(0, 1);
+    static DOWN = new Vector(0, -1);
+    static LEFT = new Vector(-1, 0);
+    static right = new Vector(1, 0);
 
     x: number;
     y: number;
@@ -90,23 +94,61 @@ class Vector {
 }
 
 const WINDOW_SIZE = new Vector(50, 11);
+const TARGET_FPS = 60;
+let frames_this_interval = 0;
+let last_interval = 0;
 
-let main = new Canvas(WINDOW_SIZE);
-let sprite = new Sprite(
-    Vector.ONE.scale(3), 
-    " | "+
-    "-+-"+
-    " | ",
-    Vector.ONE    
+let canvas = Canvas.sized(WINDOW_SIZE);
+let shuttle_sprite = new Sprite(
+    Vector.ONE, 
+    ">"
 );
-sprite.fill(["red-glow"]);
-main.sprites = main.sprites.concat([{graphic: sprite, pos: Vector.ONE}]);
 
+shuttle_sprite.fill(["blue-glow"]);
+let shuttle = canvas.put(shuttle_sprite, new Vector(0, Math.floor((WINDOW_SIZE.y-1)/2)));
 
-main.style(Vector.ZERO, ["red-glow"]); 
-main.place(Vector.ZERO.sub(new Vector(1, 0)), "-1");
-main.place(new Vector(WINDOW_SIZE.x-1, 0), "2-");
-main.place(new Vector(-1, WINDOW_SIZE.y-1), "-3");
-main.place(WINDOW_SIZE.sub(Vector.ONE), "4");
+const asteroid_sprites = [
+    new Sprite(Vector.ONE, "o"),
+    new Sprite(Vector.ONE.scale(3), "/#\\###\\#/", Vector.ONE)
+];
 
-document.getElementById("game-area")!.innerHTML = main.bake();
+for(let sprite of asteroid_sprites)
+    sprite.fill(["red-glow"]);
+
+canvas.put(asteroid_sprites[0], new Vector(10, 3));
+
+document.addEventListener('keydown', (event: KeyboardEvent) => {
+    if(event.key.toLowerCase() == "w" || event.key == "ArrowUp")
+        canvas.sprites[shuttle].pos = canvas.sprites[shuttle].pos.add(Vector.UP);
+    if(event.key.toLowerCase() == "s" || event.key == "ArrowDown")
+        canvas.sprites[shuttle].pos = canvas.sprites[shuttle].pos.add(Vector.DOWN);
+})
+
+let playing = true;
+let fps_last_interval = TARGET_FPS;
+let interval = 500;
+const loop = () => {
+    
+    let now = performance.now();
+    
+    document.getElementById("target-fps")!.innerHTML = TARGET_FPS.toString();
+    document.getElementById("fps-counter")!.innerHTML = fps_last_interval.toString();
+    document.getElementById("fps-counter")!.style.color = `hsl(${((fps_last_interval/TARGET_FPS)*120).toString(10)},100%,50%)`;
+    document.getElementById("interval-frames")!.innerHTML = frames_this_interval.toString();
+    
+    document.getElementById("game-area")!.innerHTML = canvas.bake();
+    
+    if(!playing) return;
+    frames_this_interval++;
+    
+    if(now - last_interval > interval){
+        fps_last_interval = Math.floor(1000*frames_this_interval/interval);
+        last_interval = now;
+        frames_this_interval = 0;
+    }
+
+    setTimeout(loop, 1000/TARGET_FPS - (performance.now() - now));
+
+}
+
+loop();

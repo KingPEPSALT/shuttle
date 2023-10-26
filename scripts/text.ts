@@ -25,7 +25,7 @@ class TextArea {
      * @memberof TextArea
      */
     asIndex(position: Vector): number {
-        return position.y*this.size.x + position.x;
+        return (this.size.y - 1 - position.y)*this.size.x + position.x;
     }
 
     /**
@@ -35,7 +35,7 @@ class TextArea {
      * @memberof TextArea
      */
     asVector(index: number): Vector {
-        return new Vector(index%this.size.x ,Math.floor(index/this.size.x));
+        return new Vector(index%this.size.x, this.size.y - 1 - Math.floor(index/this.size.x));
     }
 
     /**
@@ -63,7 +63,7 @@ class TextArea {
         if(char.length === 0)
             return "";
         let out = this.get(position);
-        this.buffer = this.buffer.substring(0, this.asIndex(position)) + char + this.buffer.substring(this.asIndex(position) + 1);
+        this.buffer = this.buffer.substring(0, this.asIndex(position)) + char + this.buffer.substring(this.asIndex(position)+1);
         return out;
     }
 
@@ -158,6 +158,9 @@ class RichTextArea extends TextArea {
 
 }
 
+enum SpriteConfig {
+    TransparentWhitespace = 0
+}
 /**
  * A RichTextArea with a center point and configuration flags for rendering on a Canvas
  * @class Sprite
@@ -166,20 +169,25 @@ class RichTextArea extends TextArea {
 class Sprite extends RichTextArea {
 
     center: Vector;
-    transparent_whitespace: boolean;
+    config: boolean[];
 
     /**
      * Creates an instance of Sprite.
      * @param {Vector} size
      * @param {string} [buffer=" ".repeat(size.x*size.y)]
      * @param {Vector} [center=Vector.ZERO]
-     * @param {boolean} [transparent_whitespace=true]
+     * @param {boolean} [config={"transparent_whitespace":true}]
      * @memberof Sprite
      */
-    constructor(size: Vector, buffer: string = " ".repeat(size.x*size.y), center: Vector = Vector.ZERO, transparent_whitespace = true){
+    constructor(
+        size: Vector, 
+        buffer: string = " ".repeat(size.x*size.y), 
+        center: Vector = Vector.ZERO, 
+        config: boolean[] = [true]
+    ){
         super(size, buffer);
         this.center = center;
-        this.transparent_whitespace = transparent_whitespace;
+        this.config = config;
     }
 
 }
@@ -187,24 +195,36 @@ class Sprite extends RichTextArea {
 /**
  * A RichTextArea with a list of Sprites
  * @class Canvas
- * @extends {RichTextArea}
  */
-class Canvas extends RichTextArea {
+class Canvas {
 
     sprites: {graphic: Sprite, pos: Vector}[];
-    
+    text_area: RichTextArea;
     /**
      * Creates an instance of Canvas.
      * @param {Vector} size
-     * @param {string} [buffer=" ".repeat(size.x*size.y)]
+     * @param {RichTextArea} [buffer=new RichTextArea(size)]
      * @param {{graphic: Sprite, pos: Vector}[]} [sprites=[]]
      * @memberof Canvas
      */
-    constructor(size: Vector, buffer: string = " ".repeat(size.x*size.y), sprites: {graphic: Sprite, pos: Vector}[] = []) {
-        super(size, buffer);
+    constructor(text_area: RichTextArea, sprites: {graphic: Sprite, pos: Vector}[] = []) {
+        this.text_area = text_area;
         this.sprites = sprites;
     }
     
+    static sized(size: Vector){
+        return new Canvas(new RichTextArea(size));
+    }
+    /**
+     * Puts a sprite at (pos.x, pos.y) on the Canvas
+     * @param {Sprite} sprite
+     * @param {Vector} pos
+     * @memberof Canvas
+     */
+    put(sprite: Sprite, pos: Vector): number {
+        this.sprites.push({graphic: sprite, pos: pos});
+        return this.sprites.length - 1;
+    }
     /**
      * Bakes the styling and sprites and returns the baked buffer
      * @return {*}  {string}
@@ -212,46 +232,45 @@ class Canvas extends RichTextArea {
      */
     bake(): string {
         
-        let baked_spans = this.spans;
+        let baked_text_area = Object.assign(Object.create(Object.getPrototypeOf(this.text_area)), this.text_area);    
         
-        for(let sprite of this.sprites){
+        for(let sprite of Object.values(this.sprites)){
             // transform sprite with sprice center
             let pos = sprite.pos.sub(sprite.graphic.center)
 
             // iterate over sprite rows and place them individually on the canvas
             for(let i = 0; i < sprite.graphic.size.y; i++){
-                this.place(
+                baked_text_area.place(
                     pos.add(new Vector(0, i)), 
                     sprite.graphic.buffer.substring(sprite.graphic.size.x*i, sprite.graphic.size.x*(i+1)), 
-                    sprite.graphic.transparent_whitespace
-                    );
-                }
-                // add sprite styling to canvas styling ready for baking 
-                for(const index of Object.keys(sprite.graphic.spans) as unknown as number[]){
-                    let span_pos = this.asIndex(pos.add(sprite.graphic.asVector(index)))                    
-                    if(baked_spans[span_pos] === undefined)
-                    baked_spans[span_pos] = [];
-                // avoid duplicates
-                baked_spans[span_pos] = Array.from(new Set(baked_spans[span_pos].concat(sprite.graphic.spans[index])));
+                    sprite.graphic.config[SpriteConfig.TransparentWhitespace]
+                );
+            }
+            // add sprite styling to canvas styling ready for baking 
+            for(const index of Object.keys(sprite.graphic.spans) as unknown as number[]){
+                let span_pos = this.text_area.asIndex(pos.add(sprite.graphic.asVector(index)))
+                if(baked_text_area.spans[span_pos] === undefined)
+                    baked_text_area.spans[span_pos] = [];
+                    // avoid duplicates
+                    baked_text_area.spans[span_pos] = Array.from(new Set(baked_text_area.spans[span_pos].concat(sprite.graphic.spans[index])));
             }
             
         }
 
-        let baked_buffer = this.buffer;
 
         // check if two string arrays are equal
         const areEqual = (a: string[], b: string[]) => b !== undefined && a !== undefined && a.length == b.length && a.every((element, index) => element === b[index]);
-        
-        // sort the baked_spans in reverse so we avoid interferring with the already baked section of the dictionary 
-        for(const index of (Object.keys(baked_spans) as unknown as number[]).sort((a, b) => b - a)){
-            // checks to allow us to coagulate runs of the same class-list together to form long spans rather than the span text per character
-            if(!areEqual(baked_spans[Number(index)+1], baked_spans[index]))
-                baked_buffer = baked_buffer.substring(0, Number(index)+1) + "</span>" + baked_buffer.substring(Number(index)+1);
-            if(!areEqual(baked_spans[index-1], baked_spans[index]))
-                baked_buffer = baked_buffer.substring(0, index) + `<span class="${baked_spans[index].join(" ")}">` + baked_buffer.substring(index);
-        }
+        const insertString = (a: string, b: string, i: number) => a.substring(0, i) + b + a.substring(i);
 
-        return baked_buffer;
+        // sort the baked_spans in reverse so we avoid interferring with the already baked section of the dictionary 
+        for(const index of (Object.keys(baked_text_area.spans) as unknown as number[]).sort((a, b) => b - a)){
+            // checks to allow us to coagulate runs of the same class-list together to form long spans rather than the span text per character
+            if(!areEqual(baked_text_area.spans[Number(index)+1], baked_text_area.spans[index]))
+                baked_text_area.buffer = insertString(baked_text_area.buffer, "</span>", Number(index)+1);
+            if(!areEqual(baked_text_area.spans[index-1], baked_text_area.spans[index]))
+                baked_text_area.buffer = insertString(baked_text_area.buffer, `<span class="${baked_text_area.spans[index].join(" ")}">`, index);
+        }
+        return baked_text_area.buffer;
     }
 
 }

@@ -1,14 +1,26 @@
 body, html {
     background-color: #0a0a0a;
     color: #fafafa;
+    font-family:'Courier New', Courier, monospace;
     margin: 0;
+}
+
+#frametime-info {
+    position: fixed;
+}
+
+#frametime-info > * {
+    font-weight: bolder;
+}
+
+#target-fps {
+    text-decoration: underline;
 }
 
 #game-area {
     width: 50ch;
     padding: 1ch;
     font-size:1.5em;
-    font-family:'Courier New', Courier, monospace;
     line-height:0.85em;
     white-space: break-spaces;
     word-break:break-all;
@@ -21,17 +33,34 @@ body, html {
 
 .red-glow{
     color: #fff;
-    -webkit-animation: glow 1s ease-in-out infinite alternate;
-    -moz-animation: glow 1s ease-in-out infinite alternate;
-    animation: glow 1s ease-in-out infinite alternate;
+    -webkit-animation: red-glow 1s ease-in-out infinite alternate;
+    -moz-animation: red-glow 1s ease-in-out infinite alternate;
+    animation: red-glow 1s ease-in-out infinite alternate;
     filter:saturate(5);
     font-weight:bold;
 }
-@keyframes glow {
+@keyframes red-glow {
     from {
       text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ac0000, 0 0 40px #ac0000, 0 0 50px #ac0000, 0 0 60px #ac0000, 0 0 70px #ac0000;
     }
     to {
       text-shadow: 0 0 20px #fff, 0 0 30px #ffffff, 0 0 40px #e41b1b, 0 0 50px #e41b1b, 0 0 60px #e41b1b, 0 0 70px #e41b1b, 0 0 80px #e41b1b;
     }
-  }
+}
+
+.blue-glow{
+    color: #fff;
+    -webkit-animation: blue-glow 1s ease-in-out infinite alternate;
+    -moz-animation: blue-glow 1s ease-in-out infinite alternate;
+    animation: blue-glow 1s ease-in-out infinite alternate;
+    filter:saturate(5);
+    font-weight:bold;
+}
+@keyframes blue-glow {
+    from {
+      text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #002eac, 0 0 40px #002eac, 0 0 50px #002eac, 0 0 60px #002eac, 0 0 70px #002eac;
+    }
+    to {
+      text-shadow: 0 0 20px #fff, 0 0 30px #ffffff, 0 0 40px #1b61e4, 0 0 50px #1b61e4, 0 0 60px #1b61e4, 0 0 70px #1b61e4, 0 0 80px #1b61e4;
+    }
+}
