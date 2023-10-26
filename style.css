@@ -4,6 +4,29 @@ body, html {
     font-family:'Courier New', Courier, monospace;
     margin: 0;
 }
+a {
+    color: #fafafa;
+}
+
+a:hover {
+    font-weight: bold;
+}
+
+#nav-bar {
+    position:sticky;
+    border-bottom: 1px solid #fafafa;
+    padding: 7px 1ch;
+}
+#nav-bar > ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#nav-bar > ul > li {
+    display: inline;
+}
+
 
 #frametime-info {
     position: fixed;
@@ -15,6 +38,18 @@ body, html {
 
 #target-fps {
     text-decoration: underline;
+}
+
+#title-text {
+    margin: 0;
+    position: fixed;
+    color: #fafafa;
+    top: 15%;
+    font-size: 6em;
+    line-height: 0.95em;
+    letter-spacing: -0.1em;
+    left: 50%;
+    transform: translate(-50%, 0%);
 }
 
 #game-area {

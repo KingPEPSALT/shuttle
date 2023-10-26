@@ -159,7 +159,8 @@ class RichTextArea extends TextArea {
 }
 
 enum SpriteConfig {
-    TransparentWhitespace = 0
+    TransparentWhitespace = 0,
+    TransparentStyling = 1
 }
 /**
  * A RichTextArea with a center point and configuration flags for rendering on a Canvas
@@ -176,14 +177,14 @@ class Sprite extends RichTextArea {
      * @param {Vector} size
      * @param {string} [buffer=" ".repeat(size.x*size.y)]
      * @param {Vector} [center=Vector.ZERO]
-     * @param {boolean} [config={"transparent_whitespace":true}]
+     * @param {boolean[]} [config=[true, false]]
      * @memberof Sprite
      */
     constructor(
         size: Vector, 
         buffer: string = " ".repeat(size.x*size.y), 
         center: Vector = Vector.ZERO, 
-        config: boolean[] = [true]
+        config: boolean[] = [true, false]
     ){
         super(size, buffer);
         this.center = center;
@@ -191,7 +192,18 @@ class Sprite extends RichTextArea {
     }
 
 }
-
+function deepClone<T>(obj: T): T {
+    if (obj === null || typeof obj !== "object")
+      return obj
+    let props = Object.getOwnPropertyDescriptors(obj)
+    for (let prop in props) {
+      props[prop].value = deepClone(props[prop].value)
+    }
+    return Object.create(
+      Object.getPrototypeOf(obj), 
+      props
+    )
+  }
 /**
  * A RichTextArea with a list of Sprites
  * @class Canvas
@@ -232,7 +244,7 @@ class Canvas {
      */
     bake(): string {
         
-        let baked_text_area = Object.assign(Object.create(Object.getPrototypeOf(this.text_area)), this.text_area);    
+        let baked_text_area = deepClone(this.text_area);    
         
         for(let sprite of Object.values(this.sprites)){
             // transform sprite with sprice center
@@ -248,11 +260,17 @@ class Canvas {
             }
             // add sprite styling to canvas styling ready for baking 
             for(const index of Object.keys(sprite.graphic.spans) as unknown as number[]){
+                if(sprite.graphic.buffer[index] === " " && sprite.graphic.config[SpriteConfig.TransparentWhitespace])
+                    continue;
                 let span_pos = this.text_area.asIndex(pos.add(sprite.graphic.asVector(index)))
+                if(!sprite.graphic.config[SpriteConfig.TransparentStyling]){
+                    baked_text_area.spans[span_pos] = sprite.graphic.spans[index];
+                    continue;
+                }
                 if(baked_text_area.spans[span_pos] === undefined)
                     baked_text_area.spans[span_pos] = [];
-                    // avoid duplicates
-                    baked_text_area.spans[span_pos] = Array.from(new Set(baked_text_area.spans[span_pos].concat(sprite.graphic.spans[index])));
+                // avoid duplicate classnames
+                baked_text_area.spans[span_pos] = Array.from(new Set(baked_text_area.spans[span_pos].concat(sprite.graphic.spans[index])));
             }
             
         }

@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>shuttle</title>
     <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
+    <nav id="nav-bar">
+        <ul>
+            <li><a href = "https://github.com/KingPEPSALT/shuttle">github</a></li> <b>|</b>
+        </ul>
+    </nav>
     <div id="frametime-info">
-        TARGET FPS: <span id="target-fps"></span><br>
         FPS: <span id="fps-counter"></span><br>
-        INTERVAL FRAMES: <span id="interval-frames"></span><br>
+        INTERVAL FRAMES: <span id="frame-counter"></span><br>
     </span>
     </div>
-    <div id="game-area" class="canvas"></div>
+    <div id="title-text" class="blue-glow">shuttle</div>
+    <div id="game-area"></div>
     <script src="dist/text.js"></script>
     <script src="dist/main.js"></script>
 </body>

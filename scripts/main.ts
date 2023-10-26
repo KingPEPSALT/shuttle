@@ -94,7 +94,6 @@ class Vector {
 }
 
 const WINDOW_SIZE = new Vector(50, 11);
-const TARGET_FPS = 60;
 let frames_this_interval = 0;
 let last_interval = 0;
 
@@ -108,14 +107,16 @@ shuttle_sprite.fill(["blue-glow"]);
 let shuttle = canvas.put(shuttle_sprite, new Vector(0, Math.floor((WINDOW_SIZE.y-1)/2)));
 
 const asteroid_sprites = [
-    new Sprite(Vector.ONE, "o"),
-    new Sprite(Vector.ONE.scale(3), "/#\\###\\#/", Vector.ONE)
+    new Sprite(Vector.ONE, "@"),
+    new Sprite(Vector.ONE.scale(3), "\\@/@@@/@\\", Vector.ONE)
 ];
 
 for(let sprite of asteroid_sprites)
     sprite.fill(["red-glow"]);
 
-canvas.put(asteroid_sprites[0], new Vector(10, 3));
+canvas.put(asteroid_sprites[1], new Vector(10, 3));
+
+canvas.put(asteroid_sprites[0], new Vector(25, 6));
 
 document.addEventListener('keydown', (event: KeyboardEvent) => {
     if(event.key.toLowerCase() == "w" || event.key == "ArrowUp")
@@ -125,16 +126,17 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
 })
 
 let playing = true;
-let fps_last_interval = TARGET_FPS;
-let interval = 500;
+let fps_last_interval = 0;
+let interval = 1000;
+let debug = true;
 const loop = () => {
     
     let now = performance.now();
     
-    document.getElementById("target-fps")!.innerHTML = TARGET_FPS.toString();
+    document.getElementById("frametime-info")!.style.visibility = debug ? "visible" : "hidden"; 
     document.getElementById("fps-counter")!.innerHTML = fps_last_interval.toString();
-    document.getElementById("fps-counter")!.style.color = `hsl(${((fps_last_interval/TARGET_FPS)*120).toString(10)},100%,50%)`;
-    document.getElementById("interval-frames")!.innerHTML = frames_this_interval.toString();
+    document.getElementById("fps-counter")!.style.color = `hsl(${((fps_last_interval/90)*120).toString(10)},100%,50%)`;
+    document.getElementById("frame-counter")!.innerHTML = frames_this_interval.toString();
     
     document.getElementById("game-area")!.innerHTML = canvas.bake();
     
@@ -147,7 +149,7 @@ const loop = () => {
         frames_this_interval = 0;
     }
 
-    setTimeout(loop, 1000/TARGET_FPS - (performance.now() - now));
+    window.requestAnimationFrame(loop);
 
 }
 
