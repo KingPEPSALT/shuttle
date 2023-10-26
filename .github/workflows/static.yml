@@ -35,6 +35,9 @@ jobs:
         run: |
           npm install
           npm run build --if-present
+      - name: Prepare for upload
+        run: |
+          rm -rf node_modules/ tsconfig.json LICENSE .gitignore package*.json scripts/ README.md
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
