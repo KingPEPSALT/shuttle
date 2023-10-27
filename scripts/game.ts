@@ -23,7 +23,8 @@ class Game {
             fps_last_interval: 0, 
             frames_this_interval: 0,
             last_interval: 0,
-            elapsed: 0
+            elapsed: 0,
+            dt: 0
         },
         last_press: ""
     };
@@ -57,7 +58,13 @@ class Game {
      * @memberof Game
      */
     initialiseController() {
-        const move_shuttle_func = (vector: Vector) => this.shuttle.translate.bind(this.shuttle, vector);
+        const move_shuttle_func = (vector: Vector) => {
+            return () => {
+                if(!this.shuttle.position.add(vector).within(Vector.ZERO, this.canvas.text_area.size.sub(Vector.ONE)))
+                    return;
+                this.shuttle.translate(vector);
+            }
+        }
         const fire = () => {
             let bullet = this.shuttle.fire();
             if(!bullet) return;
@@ -139,11 +146,10 @@ class Game {
      */
     loop() {
         if(!this.playing) return;
-            
         
         for(let i = this.bullets.length - 1; i >= 0; i--){
             let bullet = this.bullets[i];
-            bullet.position = bullet.position.add(Vector.RIGHT.scale(0.1));
+            bullet.position = bullet.position.add(Vector.RIGHT.scale(5/this.debug_info.frametime.fps_last_interval));
             if(bullet.position.x > WINDOW_SIZE.x-1){
                 this.canvas.entities.splice(this.canvas.entities.indexOf(bullet), 1);
                 this.bullets.splice(i, 1);
