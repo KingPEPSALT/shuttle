@@ -1,8 +1,10 @@
 body, html {
-    background-color: #0a0a0a;
+    background-color: #030303;
     color: #fafafa;
     font-family:'Courier New', Courier, monospace;
     margin: 0;
+    width: 100%;
+    height: 100%;
 }
 a {
     color: #fafafa;
@@ -10,6 +12,91 @@ a {
 
 a:hover {
     font-weight: bold;
+}
+
+#crt-filter{
+    opacity:0.3;
+    position: fixed;
+    width: 100%;
+    height:100%;
+    z-index: 9999;
+    background-image: url('./res/crt.apng');
+    background-size: 2px 1px;
+    background-color: white;
+    background-blend-mode:exclusion;
+    mix-blend-mode:multiply;
+    pointer-events: none;
+    filter: saturate(1.5);
+}
+
+.settings-range{
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    height: 1.5em;
+    background: transparent;
+    overflow: hidden;
+}
+#settings{
+    text-align: right;
+    float: right;
+}
+#settings-text{
+    padding-bottom:7px;
+    cursor: pointer;
+    user-select: none;
+}
+#settings-text:hover{
+    font-weight:bold;
+    text-decoration: underline;
+}
+.settings-slider {
+    display:flex;
+    flex-direction: column;    
+}
+.flex-space-between {
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.dropdown-content {
+    list-style-type: none;
+    margin: 0;
+    padding: 10px;
+    border: 1px solid #fafafa;
+}
+.settings-range{
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    outline:none;
+    height: 1.5em;
+    background: #030303;
+    overflow: hidden;
+}
+.settings-range::-moz-range-track{
+    height: 0.25em;
+    background: #fafafa;
+}
+.settings-range::-moz-range-thumb{
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    height:1.5em;
+    width:0.25em;
+    outline: none;
+    border: none;
+
+    background: #fafafa;
+    border-radius:0px;
+}
+
+#debug-toggle-readout {
+    user-select: none;
+}
+#debug-toggle-readout:hover {
+    font-weight:bold;
+    text-decoration: underline;
 }
 
 #nav-bar {
