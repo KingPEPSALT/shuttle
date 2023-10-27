@@ -7,13 +7,14 @@
     <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-    <img id="crt-filter" ></img>
+    <!-- welcome code-dweller, go to https://github.com/KingPEPSALT/shuttle for the cleaner typescript code :) -->
+    <img id="crt-filter"></img>
     <nav id="nav-bar">
         <ul>
             <li><a href = "https://github.com/KingPEPSALT/shuttle">github</a></li> <b>|</b>
             <li id="settings">
                 <div onclick="toggleSettingsDropdown()" id="settings-text">settings</div>
-                <ul id="settings-dropdown" class="dropdown-content" style="visibility:hidden;">
+                <ul id="settings-dropdown" class="settings-dropdown-content" style="visibility:hidden;">
                     <div class="settings-slider">
                         <label class="flex-space-between" for="crt-range">
                             <span><b>CRT filter</b></span>
@@ -25,6 +26,24 @@
                     <div class="flex-space-between settings-toggle">
                         <span><b>Debug info</b></span>
                         <span id="debug-toggle-readout"></span>
+                    </div>
+                    <hr>
+                    <div id="control-scheme-select">
+                        <div style="text-align:center; padding-bottom:5px;"><b>Control scheme</b></div>
+                        <div class="flex-space-evenly">
+                            <span class="settings-radio">
+                                <input type="radio" class="settings-radio-button" name="controls" id="controls-0" value="0">
+                                <label for="controls-0" class="settings-radio-label">1</label>
+                            </span>
+                            <span class="settings-radio"> 
+                                <input type="radio" class="settings-radio-button" name="controls" id="controls-1" value="1">
+                                <label for="controls-1" class="settings-radio-label">2</label>
+                            </span>
+                            <span class="settings-radio"> 
+                                <input type="radio" class="settings-radio-button" name="controls" id="controls-2" value="2">
+                                <label for="controls-2" class="settings-radio-label">3</label>
+                            </span>
+                        </div>
                     </div>
                 </ul>
             </li>    
@@ -44,6 +63,7 @@
     <script src="dist/entity/entity.js"></script>
     <script src="dist/entity/shuttle.js"></script>
 
+    <script src="dist/controller.js"></script>
     <script src="dist/vector.js"></script>
     <script src="dist/canvas.js"></script>
     <script src="dist/settings.js"></script>

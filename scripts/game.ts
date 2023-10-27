@@ -3,6 +3,7 @@ class Game {
     canvas: Canvas;
     playing: boolean;
     settings: Settings;
+    controller: Controller;
 
     shuttle = new Shuttle(
         new Sprite(
@@ -32,43 +33,73 @@ class Game {
      * @param {Canvas} canvas
      * @memberof Game
      */
-    constructor(canvas: Canvas, settings: Settings = new Settings()) {
+    constructor(canvas: Canvas, settings: Settings = new Settings(), controller: Controller = new Controller()) {
         this.canvas = canvas;
         this.playing = false;
         this.settings = settings;
+        this.controller = controller;
     }
 
-
+    /**
+     * Initialises and starts the game
+     * @memberof Game
+     */
     launch() {
+        this.initialiseController();
         this.registerEvents();
         this.canvas.put(this.shuttle);
         this.playing = true;
         this.loop();
     }
 
-    registerEvents() {
-        this.settings.registerEvents();
-
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if(this.settings.values.debug_mode)
-                this.debug_info.last_press = event.key;
-            if(event.key.toLowerCase() === "w" || event.key === "ArrowUp")
-            this.shuttle.position = this.shuttle.position.add(Vector.UP);
-            if(event.key.toLowerCase() === "s" || event.key === "ArrowDown")
-                this.shuttle.position = this.shuttle.position.add(Vector.DOWN);
-            if(event.key.toLowerCase() === "d")
-                this.settings.updateDebugModeSetting();
-            if(event.key.toLowerCase() == " "){
-                let bullet = this.shuttle.fire();
-                if(!bullet) return;
-                this.bullets.push(bullet);
-                this.canvas.put(bullet);
-            }
+    /**
+     * Initialises the controller with some hardcoded control schemes
+     * @memberof Game
+     */
+    initialiseController() {
+        const move_shuttle_func = (vector: Vector) => this.shuttle.translate.bind(this.shuttle, vector);
+        const fire = () => {
+            let bullet = this.shuttle.fire();
+            if(!bullet) return;
+            this.bullets.push(bullet);
+            this.canvas.put(bullet);
+        };
+        this.settings.controller.registerControlScheme({
+            "w" : move_shuttle_func(Vector.UP),
+            "s" : move_shuttle_func(Vector.DOWN),
+            "d" : this.settings.updateDebugModeSetting.bind(this.settings),
+            " " : fire
+        });
+        this.settings.controller.registerControlScheme({
+            "ArrowUp": move_shuttle_func(Vector.UP),
+            "ArrowDown": move_shuttle_func(Vector.DOWN),
+            "d" : this.settings.updateDebugModeSetting.bind(this.settings),
+            " " : fire
+        });
+        this.settings.controller.registerControlScheme({
+            "i": move_shuttle_func(Vector.UP),
+            "k": move_shuttle_func(Vector.DOWN),
+            "d" : this.settings.updateDebugModeSetting.bind(this.settings),
+            " " : fire
         });
     }
 
+    /**
+     * Registers window and element events for the game
+     * @memberof Game
+     */
+    registerEvents() {
+        this.settings.registerEvents();
+    }
+    
+    /**
+     * Updates debug information pertaining to time and framerates
+     * @memberof Game
+     */
     updateFrametimeInfo(){
+
         let frametime = this.debug_info.frametime;
+        frametime.elapsed = performance.now();
         frametime.frames_this_interval++;
         
         if(frametime.elapsed - frametime.last_interval > frametime.interval){
@@ -79,8 +110,11 @@ class Game {
         this.debug_info.frametime = frametime;
     }
 
-    updateDebugInfo() {
-        this.debug_info.frametime.elapsed = performance.now();
+    /**
+     * Renders debug information to elements
+     * @memberof Game
+     */
+    renderDebugInfo() {
         document.getElementById("debug-info")!.style.visibility = this.settings.values.debug_mode ? "visible" : "hidden"; 
         
         if(this.settings.values.debug_mode){
@@ -98,10 +132,14 @@ class Game {
         }
     }
 
+    /**
+     * Main game loop
+     * @return {*} 
+     * @memberof Game
+     */
     loop() {
         if(!this.playing) return;
             
-        this.updateDebugInfo()
         
         for(let i = this.bullets.length - 1; i >= 0; i--){
             let bullet = this.bullets[i];
@@ -111,10 +149,11 @@ class Game {
                 this.bullets.splice(i, 1);
             }
         }
-
+        
         document.getElementById("game-area")!.innerHTML = canvas.bake();
         
         this.updateFrametimeInfo();
+        this.renderDebugInfo()
         window.requestAnimationFrame(this.loop.bind(this));
     }
 

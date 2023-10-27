@@ -5,4 +5,9 @@ class Entity {
         this.sprite = sprite;
         this.position = position;
     }
+
+    translate(vector: Vector){
+        this.position = this.position.add(vector);
+    }
+
 }
