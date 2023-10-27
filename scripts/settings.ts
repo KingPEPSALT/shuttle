@@ -4,8 +4,8 @@ interface SettingsValues {
 }
 
 const EMPTY_VALUES: SettingsValues = {
-    crt_opacity: 0,
-    debug_mode: false
+    crt_opacity: 0.5,
+    debug_mode: true
 };
 class Settings {
 
@@ -13,7 +13,7 @@ class Settings {
 
     constructor(){
         this.values = EMPTY_VALUES;
-        this.updateCRTSetting();
+        this.updateSettings();
     }
     
     registerEvents() {
@@ -21,15 +21,21 @@ class Settings {
         document.getElementById("crt-range")!.oninput = this.updateCRTSetting.bind(this);
     }
 
-    updateDebugModeSetting() {
-        this.values.debug_mode = document.getElementById("debug-toggle-readout")!.innerHTML !== "ON";
-        document.getElementById("debug-toggle-readout")!.innerHTML = this.values.debug_mode ? "ON" : "OFF";
-        document.getElementById("debug-toggle-readout")!.style.color = this.values.debug_mode ? "green" : "red";
+    updateSettings(){
+        this.updateCRTSetting();
+        this.updateDebugModeSetting();
     }
+
     updateCRTSetting() {
-        this.values.crt_opacity = Number((document.getElementById("crt-range")! as HTMLInputElement).value);
+        this.values.crt_opacity = (document.getElementById("crt-range")! as HTMLInputElement).valueAsNumber;
         document.getElementById("crt-readout")!.innerHTML = this.values.crt_opacity.toFixed(2);
         document.getElementById("crt-filter")!.style.opacity = this.values.crt_opacity.toString();
     }
-    
+
+    updateDebugModeSetting() {
+        this.values.debug_mode = !this.values.debug_mode;
+        document.getElementById("debug-toggle-readout")!.innerHTML = this.values.debug_mode ? "ON" : "OFF";
+        document.getElementById("debug-toggle-readout")!.style.color = this.values.debug_mode ? "green" : "red";
+    }
+
 }

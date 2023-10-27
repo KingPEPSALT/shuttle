@@ -218,7 +218,7 @@ function deepClone<T>(obj: T): T {
  */
 class Canvas {
 
-    sprites: {graphic: Sprite, pos: Vector}[];
+    entities: Entity[];
     text_area: RichTextArea;
     /**
      * Creates an instance of Canvas.
@@ -227,9 +227,9 @@ class Canvas {
      * @param {{graphic: Sprite, pos: Vector}[]} [sprites=[]]
      * @memberof Canvas
      */
-    constructor(text_area: RichTextArea, sprites: {graphic: Sprite, pos: Vector}[] = []) {
+    constructor(text_area: RichTextArea, entities: Entity[] = []) {
         this.text_area = text_area;
-        this.sprites = sprites;
+        this.entities = entities;
     }
     
     static sized(size: Vector){
@@ -239,12 +239,24 @@ class Canvas {
      * Puts a sprite at (pos.x, pos.y) on the Canvas
      * @param {Sprite} sprite
      * @param {Vector} pos
+     * @return {*} {number}
      * @memberof Canvas
      */
-    put(sprite: Sprite, pos: Vector): number {
-        this.sprites.push({graphic: sprite, pos: pos});
-        return this.sprites.length - 1;
+    putSprite(sprite: Sprite, position: Vector): number {
+        return this.put(new Entity(sprite, position));
     }
+
+    /**
+     * Puts an entity on the Canvas
+     * @param {Entity} entity 
+     * @return {*} {number}
+     * @memberof Canvas
+     */
+    put(entity: Entity): number {
+        this.entities.push(entity);
+        return this.entities.length - 1;
+    }
+    
     /**
      * Bakes the styling and sprites and returns the baked buffer
      * @return {*}  {string}
@@ -254,31 +266,31 @@ class Canvas {
         
         let baked_text_area = deepClone(this.text_area);    
         
-        for(let sprite of Object.values(this.sprites)){
+        for(let entity of this.entities){
             // transform sprite with sprice center
-            let pos = sprite.pos.sub(sprite.graphic.center)
+            let pos = entity.position.sub(entity.sprite.center)
 
             // iterate over sprite rows and place them individually on the canvas
-            for(let i = 0; i < sprite.graphic.size.y; i++){
+            for(let i = 0; i < entity.sprite.size.y; i++){
                 baked_text_area.place(
                     pos.add(new Vector(0, i)), 
-                    sprite.graphic.buffer.substring(sprite.graphic.size.x*i, sprite.graphic.size.x*(i+1)), 
-                    sprite.graphic.config[SpriteConfig.TransparentWhitespace]
+                    entity.sprite.buffer.substring(entity.sprite.size.x*i, entity.sprite.size.x*(i+1)), 
+                    entity.sprite.config[SpriteConfig.TransparentWhitespace]
                 );
             }
             // add sprite styling to canvas styling ready for baking 
-            for(const index of Object.keys(sprite.graphic.spans) as unknown as number[]){
-                if(sprite.graphic.buffer[index] === " " && sprite.graphic.config[SpriteConfig.TransparentWhitespace])
+            for(const index of Object.keys(entity.sprite.spans) as unknown as number[]){
+                if(entity.sprite.buffer[index] === " " && entity.sprite.config[SpriteConfig.TransparentWhitespace])
                     continue;
-                let span_pos = this.text_area.asIndex(pos.add(sprite.graphic.asVector(index)))
-                if(!sprite.graphic.config[SpriteConfig.TransparentStyling]){
-                    baked_text_area.spans[span_pos] = sprite.graphic.spans[index];
+                let span_pos = this.text_area.asIndex(pos.add(entity.sprite.asVector(index)))
+                if(!entity.sprite.config[SpriteConfig.TransparentStyling]){
+                    baked_text_area.spans[span_pos] = entity.sprite.spans[index];
                     continue;
                 }
                 if(baked_text_area.spans[span_pos] === undefined)
                     baked_text_area.spans[span_pos] = [];
                 // avoid duplicate classnames
-                baked_text_area.spans[span_pos] = Array.from(new Set(baked_text_area.spans[span_pos].concat(sprite.graphic.spans[index])));
+                baked_text_area.spans[span_pos] = Array.from(new Set(baked_text_area.spans[span_pos].concat(entity.sprite.spans[index])));
             }
             
         }
