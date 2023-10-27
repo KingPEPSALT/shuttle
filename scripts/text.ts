@@ -25,7 +25,7 @@ class TextArea {
      * @memberof TextArea
      */
     asIndex(position: Vector): number {
-        return (this.size.y - 1 - position.y)*this.size.x + position.x;
+        return (this.size.y - 1 - Math.round(position.y))*this.size.x + Math.round(position.x);
     }
 
     /**
@@ -115,11 +115,16 @@ class RichTextArea extends TextArea {
      * Creates an instance of RichTextArea.
      * @param {Vector} size
      * @param {string} [buffer=" ".repeat(size.x*size.y)]
+     * @param {Record<number, string[]> | string[]} [spans={}]
      * @memberof RichTextArea
      */
-    constructor(size: Vector, buffer: string = " ".repeat(size.x*size.y)){
+    constructor(size: Vector, buffer: string = " ".repeat(size.x*size.y), spans: Record<number, string[]> | string[] = {}){
         super(size, buffer);
-        this.spans = {};
+        if(Array.isArray(spans)){
+            this.spans = {};
+            this.fill(spans);
+        } else
+            this.spans = spans;
     }
 
     /**
@@ -177,6 +182,7 @@ class Sprite extends RichTextArea {
      * @param {Vector} size
      * @param {string} [buffer=" ".repeat(size.x*size.y)]
      * @param {Vector} [center=Vector.ZERO]
+     * @param {Record<number, string[]> | string[]} [spans={}]
      * @param {boolean[]} [config=[true, false]]
      * @memberof Sprite
      */
@@ -184,12 +190,14 @@ class Sprite extends RichTextArea {
         size: Vector, 
         buffer: string = " ".repeat(size.x*size.y), 
         center: Vector = Vector.ZERO, 
+        spans: Record<number, string[]> | string[] = {},
         config: boolean[] = [true, false]
     ){
-        super(size, buffer);
+        super(size, buffer, spans);
         this.center = center;
         this.config = config;
     }
+
 
 }
 function deepClone<T>(obj: T): T {
