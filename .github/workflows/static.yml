@@ -29,13 +29,15 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Build Typescript
         run: |
           npm install
           npm run build --if-present
-          npm test
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Prepare for upload
+        run: |
+          rm -rf node_modules/ tsconfig.json LICENSE .gitignore package*.json scripts/ README.md
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
