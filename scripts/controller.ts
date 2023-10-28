@@ -1,4 +1,4 @@
-type ControlScheme = Record<string, () => void>;
+type ControlScheme = Record<string, ((event: KeyboardEvent) => void) | (() => void)>;
 
 /**
  * Handles different control schemes
@@ -34,7 +34,7 @@ class Controller {
                 this.schemes[index][key] = value;
                 continue;
             }
-            this.schemes[index][key] = () => {this.schemes[index][key](); value()};
+            this.schemes[index][key] = (event: KeyboardEvent) => {this.schemes[index][key](event); value(event)};
         } 
     }
     
@@ -45,9 +45,10 @@ class Controller {
      */
     registerControlEvents(index: number = 0): void {
         window.onkeydown = (event: KeyboardEvent) => {
+            this.schemes[index]["always"](event);
             if(this.schemes[index][event.key] === undefined)
                 return;
-            this.schemes[index][event.key]();
+            this.schemes[index][event.key](event);
         };
     }
     

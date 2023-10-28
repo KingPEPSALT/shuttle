@@ -161,17 +161,21 @@ a:hover {
 
 /* game styling */
 #game-area {
-    width: 50ch;
-    padding: 1ch;
+    position:absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#main-canvas {
     font-size:1.5em;
     line-height:0.85em;
     white-space: break-spaces;
     word-break:break-all;
     border: 1px #fafafa solid;
-    position: fixed; 
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    width: 50ch;
+    padding: 1ch;
+
 }
 
 .red-glow{

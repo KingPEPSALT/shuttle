@@ -81,7 +81,7 @@ class TextArea {
             return this.set(position, str);
         if(str.trim().length === 0)
             return "";
-        if(!position.within(Vector.ZERO.sub(new Vector(str.length-1, 0)), this.size.sub(Vector.ONE)))
+        if(!position.within(Vector.ZERO, this.size.sub(Vector.ONE)))
             return "";
         let index = this.asIndex(position);
         let out = this.buffer.substring(index, index + str.length);
@@ -98,6 +98,10 @@ class TextArea {
             return this.place(new Vector(0, position.y), str.substring(-position.x));
         this.buffer = this.buffer.substring(0, index) + str + this.buffer.substring(index + str.length);
         return out;
+    }
+
+    clear(){
+        this.buffer = " ".repeat(this.buffer.length);
     }
 
 }
@@ -160,7 +164,10 @@ class RichTextArea extends TextArea {
         return true;        
     }
 
-
+    override clear(){
+        this.buffer = " ".repeat(this.buffer.length);
+        this.spans = {};
+    }
 }
 
 enum SpriteConfig {
@@ -302,6 +309,8 @@ class Canvas {
 
         // sort the baked_spans in reverse so we avoid interferring with the already baked section of the dictionary 
         for(const index of (Object.keys(baked_text_area.spans) as unknown as number[]).sort((a, b) => b - a)){
+            if(index > this.text_area.buffer.length - 1)
+                continue;
             // checks to allow us to coagulate runs of the same class-list together to form long spans rather than the span text per character
             if(!areEqual(baked_text_area.spans[Number(index)+1], baked_text_area.spans[index]))
                 baked_text_area.buffer = insertString(baked_text_area.buffer, "</span>", Number(index)+1);
@@ -309,6 +318,11 @@ class Canvas {
                 baked_text_area.buffer = insertString(baked_text_area.buffer, `<span class="${baked_text_area.spans[index].join(" ")}">`, index);
         }
         return baked_text_area.buffer;
+    }
+
+    clear() {
+        this.text_area.clear();
+        this.entities = [];
     }
 
 }

@@ -5,14 +5,16 @@ class Shuttle extends Entity {
 
     constructor(sprite: Sprite, position: Vector){
         super(sprite, position);
-        this.fire_delay = 400; //ms
+        this.fire_delay = 300; //ms
         this.last_fire = 0;
     }
-    
+
     fire(): Entity | undefined {
         let now = performance.now();
         if(now - this.last_fire < this.fire_delay)  
             return;
+        
+        (document.getElementById('fire_sound')!.cloneNode(true) as HTMLAudioElement).play();
         this.last_fire = now;
         return new Entity(
             new Sprite(Vector.ONE, "-", Vector.ZERO, ["blue-glow"]),

@@ -58,9 +58,16 @@
     </div>
     
     <div id="title-text" class="blue-glow">shuttle</div>
-    <div id="game-area"></div>
+
+    <div id="game-area">
+        <div id="score-readout">
+            Score: <span id="score"></span>
+        </div>
+        <div id="main-canvas"></div>
+    </div>
 
     <script src="dist/entity/entity.js"></script>
+    <script src="dist/entity/asteroid.js"></script>
     <script src="dist/entity/shuttle.js"></script>
 
     <script src="dist/controller.js"></script>
@@ -70,7 +77,7 @@
     <script src="dist/game.js"></script>
     <script src="dist/main.js"></script>
 
-
+    <audio id="fire_sound" src="res/shoot.mp3"></audio>
 
 </body>
 </html>
